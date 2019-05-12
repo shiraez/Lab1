@@ -1,4 +1,5 @@
 from tkinter import *
+from backend import *
 
 def logModification(var,*args):
     print('variable '+var+' has been modified')
@@ -21,12 +22,12 @@ label_year = Label(window, text="Year", width=8)
 title_year=StringVar()
 entry_year=Entry(window,textvariable=title_year)
 
-bView=Button(window,text='View all', width=15)
-bSearch=Button(window,text='Search entry', width=15)
+bView=Button(window,text='View all', width=15,command=lambda : listBox.insert(END, view()))
+bSearch=Button(window,text='Search entry', width=15,command=lambda : listBox.insert(END, search(title_ID.get(), entry_title.get(),entry_year.get())))
 bAdd=Button(window,text='Add entry', width=15)
 bUpdate=Button(window,text='Update selected', width=15)
 bDelete=Button(window,text='Delete selected', width=15)
-bClose=Button(window,text='Close', width=15)
+bClose=Button(window,text='Close', width=15, command=lambda: window.destroy())
 
 listBox=Listbox(upperFrame)
 scrollbar= Scrollbar(upperFrame)
@@ -51,3 +52,5 @@ listBox.grid(row=0, column=0)
 scrollbar.grid(row=0, column=2)
 
 window.mainloop()
+
+
