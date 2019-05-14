@@ -1,11 +1,9 @@
 import sqlite3
-from flask import Flask
-from flask import jsonify
-from flask import request
 import csv
 
 
 # app = Flask(__name__)
+import jsonify as jsonify
 
 
 def create_table():
@@ -51,7 +49,7 @@ def view():
         cur = conn.cursor()
         cur.execute("SELECT * FROM movies;")
         rows = cur.fetchall()
-        return rows
+        return jsonify(rows)
 
 def search(movieId, title, genres):
     with connect() as conn:
