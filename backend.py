@@ -44,6 +44,7 @@ def insertall():
                 if ('|' in genres):
                     genres = genres.split("|")[0]
                 cur.execute("INSERT INTO movies VALUES (?,?,?);", (row[0], row[1], genres))
+            cur.execute("DELETE FROM movies WHERE movieId = 'movieId'")
             conn.commit()
 
 
@@ -145,7 +146,7 @@ def view():
                 CR_u_n.append((str(row[1]), row[2]))
         rn_avg = float(sum_rating) / len(rows)
 
-        user_sim(CR_u_n, )
+        # user_sim(CR_u_n, )
 
     conn.close()
     return jsonify(CR_u_n)
