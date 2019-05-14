@@ -3,7 +3,11 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 import csv
+from scipy.stats.stats import pearsonr
 import math
+import warnings
+
+warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
 
@@ -117,7 +121,7 @@ def insert_all_ratings():
 
 
 @app.route('/rec', methods=['GET', 'POST'])
-def view():
+def view2():
     user_id = request.args.get('userid')
     k = request.args.get('k')
     user_movies = []
@@ -126,30 +130,56 @@ def view():
     cur = conn.cursor()
     cur.execute("SELECT * FROM Rating WHERE userId = ?;", (user_id,))
     rows = cur.fetchall()
-    sum_rating = 0
     for row in rows:
         user_movies.append(str(row[1]))
         user_movies_ratings[str(row[1])] = row[2]
-        sum_rating += row[2]
-    ru_avg = float(sum_rating) / len(user_movies)
 
     cur.execute("SELECT DISTINCT userId FROM Rating WHERE NOT userId = ?;", (user_id,))
     user_ids = cur.fetchall()
+    pearsonr_users = {}
     for uid in user_ids:
-        CR_u_n = []
         cur.execute("SELECT * FROM Rating WHERE userId = ?;", (str(uid[0]),))
         rows = cur.fetchall()
-        sum_rating = 0
+        user_n_ratings = []
+        user_u_ratings = []
         for row in rows:
-            sum_rating += row[2]
-            if row[1] in user_movies:
-                CR_u_n.append((str(row[1]), row[2]))
-        rn_avg = float(sum_rating) / len(rows)
+            if str(row[1]) in user_movies:
+                user_n_ratings.append(row[2])
+                user_u_ratings.append(user_movies_ratings[str(row[1])])
+        if len(user_n_ratings) is 0 or len(user_n_ratings) is 1:
+            pearsonr_users[str(uid[0])] = 0
+        else:
+            pearsonr_users[str(uid[0])] = pearsonr(user_n_ratings, user_u_ratings)[1]
+            if math.isnan(pearsonr_users[str(uid[0])]):
+                pearsonr_users[str(uid[0])] = 0
 
-        # user_sim(CR_u_n, )
+    max_users = []
+    for i in range(0, int(k)):
+        max = 0
+        u = ''
+        for user in pearsonr_users.keys():
+            if pearsonr_users[user] >= max:
+                max = pearsonr_users[user]
+                u = user
+        pearsonr_users[u] = 0
+        max_users.append(u)
+
+    result_movies = []
+    for user in max_users:
+        cur.execute("SELECT movieId FROM Rating WHERE userId = ? order by rating;", (user,))
+        movies = cur.fetchall()
+        for movie in movies:
+            if str(movie[0]) not in result_movies:
+                result_movies.append(str(movie[0]))
+                break
+
+    movies_names = []
+    for movie in result_movies:
+        cur.execute("SELECT title FROM movies WHERE movieId = ?;", (movie,))
+        movies_names.append(cur.fetchall()[0][0])
 
     conn.close()
-    return jsonify(CR_u_n)
+    return jsonify(movies_names)
 
 
 if __name__ == '__main__':
