@@ -1,4 +1,4 @@
-from tkinter import *
+from Tkinter import *
 from backend import *
 
 def logModification(var,*args):
@@ -22,7 +22,15 @@ label_year = Label(window, text="Year", width=8)
 title_year=StringVar()
 entry_year=Entry(window,textvariable=title_year)
 
-bView=Button(window,text='View all', width=15,command=lambda : listBox.insert(END, view()))
+def foo():
+    d = view()
+    listBox.insert(END, d )
+    print("DDDDD")
+
+
+
+bView=Button(window,text='View all', width=15,command=foo)
+# bView=Button(window,text='View all', width=15,command=lambda : listBox.insert(END, view()))
 bSearch=Button(window,text='Search entry', width=15,command=lambda : listBox.insert(END, search(title_ID.get(), entry_title.get(),entry_year.get())))
 bAdd=Button(window,text='Add entry', width=15)
 bUpdate=Button(window,text='Update selected', width=15)
@@ -48,9 +56,11 @@ bClose.grid(row=7,column=3)
 
 upperFrame.grid(row=3, column=0, rowspan=5, columnspan=3)
 
-listBox.grid(row=0, column=0)
+listBox.grid(row=0, column=0, columnspan=3)
 scrollbar.grid(row=0, column=2)
 
 window.mainloop()
+
+
 
 

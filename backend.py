@@ -53,7 +53,7 @@ def view():
         cur = conn.cursor()
         cur.execute("SELECT * FROM movies;")
         rows = cur.fetchall()
-        return rows
+        return jsonify(rows)
 
 
 def search(movieId, title, genres):
