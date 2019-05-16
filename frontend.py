@@ -22,18 +22,40 @@ label_year = Label(window, text="Year", width=8)
 title_year=StringVar()
 entry_year=Entry(window,textvariable=title_year)
 
-def foo():
-    d = view()
-    listBox.insert(END, d )
-    print("DDDDD")
+def viewall():
+    listBox.delete(0, END)
+    rows = view()
+    for row in rows:
+        listBox.insert(END, ' '.join(row))
+
+def searchHen():
+    listBox.delete(0, END)
+    rows = search(title_ID.get(), entry_title.get(),entry_year.get())
+    for row in rows:
+        listBox.insert(END, ' '.join(row))
+
+def updateSelected():
+    listBox.delete(0, END)
+    rows = update(title_ID.get(), entry_title.get(),entry_year.get())
+    for row in rows:
+        listBox.insert(END, ' '.join(row))
+
+def add_entry():
+    listBox.delete(0, END)
+    try:
+        insert_to_db(title_ID.get(), entry_title.get(),entry_year.get())
+    except Exception:
+        print Exception.message
 
 
 
-bView=Button(window,text='View all', width=15,command=foo)
+
+
+bView=Button(window,text='View all', width=15,command=viewall)
 # bView=Button(window,text='View all', width=15,command=lambda : listBox.insert(END, view()))
-bSearch=Button(window,text='Search entry', width=15,command=lambda : listBox.insert(END, search(title_ID.get(), entry_title.get(),entry_year.get())))
-bAdd=Button(window,text='Add entry', width=15)
-bUpdate=Button(window,text='Update selected', width=15)
+bSearch=Button(window,text='Search entry', width=15,command=searchHen)
+bAdd=Button(window,text='Add entry', width=15, command=add_entry)
+bUpdate=Button(window,text='Update selected', width=15,command=updateSelected)
 bDelete=Button(window,text='Delete selected', width=15)
 bClose=Button(window,text='Close', width=15, command=lambda: window.destroy())
 

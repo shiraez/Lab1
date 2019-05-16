@@ -53,13 +53,19 @@ def view():
         cur = conn.cursor()
         cur.execute("SELECT * FROM movies;")
         rows = cur.fetchall()
-        return jsonify(rows)
+        return rows
 
 
 def search(movieId, title, genres):
     with connect() as conn:
         cur = conn.cursor()
-        cur.execute("SELECT * FROM movies WHERE movieId = ? AND title = ? AND genres = ?;", movieId, title, genres)
+        if movieId is "":
+            movieId = movieId + '%'
+        if title is "":
+            title = title + '%'
+        if genres is "":
+            genres = genres + '%'
+        cur.execute("SELECT * FROM movies WHERE movieId LIKE ? AND title LIKE ? AND genres LIKE ?;", (movieId, title, genres))
         rows = cur.fetchall()
         return rows
 
@@ -117,7 +123,7 @@ def insert_all_ratings():
 
 
 @app.route('/rec', methods=['GET', 'POST'])
-def view():
+def view2():
     user_id = request.args.get('userid')
     k = request.args.get('k')
     user_movies = []
