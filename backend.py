@@ -3,7 +3,7 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 import csv
-# from scipy.stats.stats import pearsonr
+from scipy.stats.stats import pearsonr
 import math
 import warnings
 
