@@ -10,7 +10,7 @@ window=Tk()
 upperFrame = Frame(window)
 
 e1_value=StringVar()
-
+####### View ################
 label_title = Label(window, text="Title", width=8)
 title_value=StringVar()
 entry_title=Entry(window,textvariable=title_value)
@@ -22,6 +22,7 @@ entry_ID=Entry(window,textvariable=title_ID)
 label_year = Label(window, text="Genres", width=8)
 title_year=StringVar()
 entry_year=Entry(window,textvariable=title_year)
+listBox = Listbox(upperFrame, width=35)
 
 def viewall():
     listBox.delete(0, END)
@@ -38,7 +39,9 @@ def searchHen():
 def updateSelected():
      text = list(listBox.get(0,END))
      index = listBox.curselection()
-     record = listBox.get(listBox.curselection()).split(",")
+     if len(index) == 0:
+         return
+     record = listBox.get(index).split(",")
      id = record[0] if (title_ID.get() == "") else title_ID.get()
      title = record[1] if (entry_title.get() == "") else entry_title.get()
      genres = record[2]if (entry_year.get() == "") else entry_year.get()
@@ -70,54 +73,56 @@ def add_entry():
 
 def delete_entry():
     index = listBox.curselection()
+    if len(index) == 0:
+        return
     record = listBox.get(index).split(",")
     id = record[0]
-    title = record[1]
-    genres = record[2]
-    # try:
-    delete(id, title, genres)
-    # except Exception:
-    #     messagebox.showinfo("Error", "The record isn't valid")
+    delete(id)
     listBox.delete(index)
 
 
 
 
 
-bView=Button(window,text='View all', width=15,command=viewall)
-# bView=Button(window,text='View all', width=15,command=lambda : listBox.insert(END, view()))
-bSearch=Button(window,text='Search entry', width=15,command=searchHen)
-bAdd=Button(window,text='Add entry', width=15, command=add_entry)
-bUpdate=Button(window,text='Update selected', width=15,command=updateSelected)
-bDelete=Button(window,text='Delete selected', width=15,command=delete_entry)
-bClose=Button(window,text='Close', width=15, command=lambda: window.destroy())
+def add_window():
+    bView = Button(window, text='View all', width=15, command=viewall)
+    # bView=Button(window,text='View all', width=15,command=lambda : listBox.insert(END, view()))
+    bSearch = Button(window, text='Search entry', width=15, command=searchHen)
+    bAdd = Button(window, text='Add entry', width=15, command=add_entry)
+    bUpdate = Button(window, text='Update selected', width=15, command=updateSelected)
+    bDelete = Button(window, text='Delete selected', width=15, command=delete_entry)
+    bClose = Button(window, text='Close', width=15, command=lambda: window.destroy())
 
-listBox=Listbox(upperFrame, width=35)
-scrollbar= Scrollbar(upperFrame, orient="vertical")
 
-label_title.grid(row=0,column=0)
-entry_title.grid(row=0,column=1)
-label_year.grid(row=0,column=2)
-entry_year.grid(row=0,column=3)
-label_ID.grid(row=1,column=0)
-entry_ID.grid(row=1,column=1)
+    scrollbar = Scrollbar(upperFrame, orient="vertical")
+    label_title.grid(row=0,column=0)
+    entry_title.grid(row=0,column=1)
+    label_year.grid(row=0,column=2)
+    entry_year.grid(row=0,column=3)
+    label_ID.grid(row=1,column=0)
+    entry_ID.grid(row=1,column=1)
 
-bView.grid(row=2,column=3)
-bSearch.grid(row=3,column=3)
-bAdd.grid(row=4,column=3)
-bUpdate.grid(row=5,column=3)
-bDelete.grid(row=6,column=3)
-bClose.grid(row=7,column=3)
+    bView.grid(row=2,column=3)
+    bSearch.grid(row=3,column=3)
+    bAdd.grid(row=4,column=3)
+    bUpdate.grid(row=5,column=3)
+    bDelete.grid(row=6,column=3)
+    bClose.grid(row=7,column=3)
 
-upperFrame.grid(row=3, column=0, rowspan=5, columnspan=3)
+    upperFrame.grid(row=3, column=0, rowspan=5, columnspan=3)
 
-# listBox.grid(row=0, column=0, columnspan=3)
-listBox.pack(side="left", fill="y")
-scrollbar.config(command=listBox.yview)
-scrollbar.pack(side="right", fill="y")
-listBox.config(yscrollcommand=scrollbar.set)
+    # listBox.grid(row=0, column=0, columnspan=3)
+    listBox.pack(side="left", fill="y")
+    scrollbar.config(command=listBox.yview)
+    scrollbar.pack(side="right", fill="y")
+    listBox.config(yscrollcommand=scrollbar.set)
 
-window.mainloop()
+
+
+if __name__ == '__main__':
+    create_table()
+    add_window()
+    window.mainloop()
 
 
 

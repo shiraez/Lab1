@@ -13,6 +13,10 @@ app = Flask(__name__)
 
 
 def create_table():
+
+    """
+        create table if not exist
+    """
     try:
         with connect() as conn:
             cur = conn.cursor()
@@ -24,12 +28,19 @@ def create_table():
 
 
 def connect():
+    """
+        connect to db
+    """
     conn = sqlite3.connect('lite.db')
     conn.text_factory = str
     return conn
 
 
 def insert_to_db(movieId, title, genres):
+    """
+    :param movieId: movie id, title: movie title, genres: movie genres
+    add to db if not exist
+    """
     with connect() as conn:
         cur = conn.cursor()
         if ('|' in genres):
@@ -53,6 +64,9 @@ def insertall():
 
 
 def view():
+    """
+    :return: all movies
+    """
     with connect() as conn:
         cur = conn.cursor()
         cur.execute("SELECT * FROM movies;")
@@ -61,6 +75,10 @@ def view():
 
 
 def search(movieId, title, genres):
+    """
+    :param movieId: movie id, title: movie title, genres: movie genres
+    :return: the record that mach
+    """
     with connect() as conn:
         cur = conn.cursor()
         if movieId is "" and title is "" and genres is "":
@@ -76,7 +94,11 @@ def search(movieId, title, genres):
         return rows
 
 
-def delete(movieId, title, genres):
+def delete(movieId):
+    """
+    :param movieId: movie id
+     delete movie from db
+    """
     with connect() as conn:
         cur = conn.cursor()
         cur.execute("DELETE FROM movies WHERE movieId = ?;", (movieId, ))
@@ -84,6 +106,10 @@ def delete(movieId, title, genres):
 
 
 def update(movieId, title, genres):
+    """
+        :param movieId: movie id, title: movie title, genres: movie genres
+        :return: update record
+    """
     with connect() as conn:
         cur = conn.cursor()
         cur.execute("UPDATE movies SET title=?, genres=? WHERE movieId=?;", (title, genres, movieId))
