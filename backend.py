@@ -3,7 +3,7 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 import csv
-from scipy.stats.stats import pearsonr
+# from scipy.stats.stats import pearsonr
 import math
 import warnings
 
@@ -63,6 +63,8 @@ def view():
 def search(movieId, title, genres):
     with connect() as conn:
         cur = conn.cursor()
+        if movieId is "" and title is "" and genres is "":
+            return []
         if movieId is "":
             movieId = movieId + '%'
         if title is "":
@@ -77,7 +79,7 @@ def search(movieId, title, genres):
 def delete(movieId, title, genres):
     with connect() as conn:
         cur = conn.cursor()
-        cur.execute("DELETE FROM movies WHERE movieId = ? AND title = ? AND genres = ?;", movieId, title, genres)
+        cur.execute("DELETE FROM movies WHERE movieId = ? AND title = ? AND genres = ?;", (movieId, title, genres))
         conn.commit()
 
 
