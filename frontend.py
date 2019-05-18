@@ -19,7 +19,7 @@ label_ID = Label(window, text="ID", width=8)
 title_ID=StringVar()
 entry_ID=Entry(window,textvariable=title_ID)
 
-label_year = Label(window, text="Year", width=8)
+label_year = Label(window, text="Genres", width=8)
 title_year=StringVar()
 entry_year=Entry(window,textvariable=title_year)
 
@@ -36,7 +36,7 @@ def searchHen():
         listBox.insert(END, ', '.join(row))
 
 def updateSelected():
-     text = listBox.get(0,END)
+     text = list(listBox.get(0,END))
      index = listBox.curselection()
      record = listBox.get(listBox.curselection()).split(",")
      id = record[0] if (title_ID.get() == "") else title_ID.get()
@@ -48,21 +48,25 @@ def updateSelected():
          messagebox.showinfo("Error", "The ID isn't valid")
          return
      listBox.delete(index)
+     listBox.insert(index, "{}, {}, {}".format(id, title, genres))
 
 
 
 def add_entry():
     listBox.delete(0, END)
-    if title_ID.get == "" or entry_title.get() == "" or entry_year.get() == "":
+    if title_ID.get() == "" or entry_title.get() == "" or entry_year.get() == "":
         messagebox.showinfo("Error", "You need to add all field")
 
     else:
         if len(search(title_ID.get(), "", "")) >0:
             messagebox.showinfo("Error", "ID already exist")
+            return
         try:
             insert_to_db(title_ID.get(), entry_title.get(),entry_year.get())
         except Exception:
             messagebox.showinfo("Error", "the record isn't valid")
+            return
+        listBox.insert(END, "{}, {}, {}".format(title_ID.get(), entry_title.get(), entry_year.get()))
 
 def delete_entry():
     index = listBox.curselection()
@@ -79,6 +83,7 @@ def delete_entry():
 
 
 
+
 bView=Button(window,text='View all', width=15,command=viewall)
 # bView=Button(window,text='View all', width=15,command=lambda : listBox.insert(END, view()))
 bSearch=Button(window,text='Search entry', width=15,command=searchHen)
@@ -87,8 +92,8 @@ bUpdate=Button(window,text='Update selected', width=15,command=updateSelected)
 bDelete=Button(window,text='Delete selected', width=15,command=delete_entry)
 bClose=Button(window,text='Close', width=15, command=lambda: window.destroy())
 
-listBox=Listbox(window)
-scrollbar= Scrollbar(listBox, orient="vertical")
+listBox=Listbox(upperFrame, width=35)
+scrollbar= Scrollbar(upperFrame, orient="vertical")
 
 label_title.grid(row=0,column=0)
 entry_title.grid(row=0,column=1)
@@ -110,6 +115,7 @@ upperFrame.grid(row=3, column=0, rowspan=5, columnspan=3)
 listBox.pack(side="left", fill="y")
 scrollbar.config(command=listBox.yview)
 scrollbar.pack(side="right", fill="y")
+listBox.config(yscrollcommand=scrollbar.set)
 
 window.mainloop()
 

@@ -79,7 +79,7 @@ def search(movieId, title, genres):
 def delete(movieId, title, genres):
     with connect() as conn:
         cur = conn.cursor()
-        cur.execute("DELETE FROM movies WHERE movieId = ? AND title = ? AND genres = ?;", (movieId, title, genres))
+        cur.execute("DELETE FROM movies WHERE movieId = ?;", (movieId, ))
         conn.commit()
 
 
