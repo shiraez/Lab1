@@ -57,19 +57,18 @@ training_set = feature_sets[:5000]
 
 print("training")
 X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1, random_state=0)
-# classifier = nltk.NaiveBayesClassifier.train(training_set)
 
 print("testing")
-# print("Classifier accuracy percent:", (nltk.classify.accuracy(classifier, testing_set)) * 100)
-k=10
+
+
 cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
 accur = []
 i = 0
-
 for traincv, testcv in cv:
-    testing_this_round = training_set[testcv[0]:testcv[len(testcv)-1]]
-    classifier = nltk.NaiveBayesClassifier.train(training_set[traincv[0]:traincv[len(traincv)-1]])
-    accur.insert(i,nltk.classify.util.accuracy(classifier, training_set[testcv[0]:testcv[len(testcv)-1]]))
+    testing_this_round = training_set[testcv[0]:testcv[len(testcv) - 1]]
+    LinearSVC_classifier = SklearnClassifier(LinearSVC())
+    classifier = LinearSVC_classifier.train(training_set[traincv[0]:traincv[len(traincv)-1]])
+    accur.insert(i,nltk.classify.util.accuracy(classifier, testing_this_round))
     print('accuracy:',accur[i])
     i = i+1
     refsets = collections.defaultdict(set)
@@ -82,47 +81,8 @@ for traincv, testcv in cv:
 
     print('Precision:', precision(refsets['1'], testsets['1']))
     print('Recall:', recall(refsets['1'], testsets['1']))
-
-
-print('NaiveBayesClassifier average accuracy:',sum(accur) / len(accur) )
-
-
-
-
-cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
-accur = []
-i = 0
-for traincv, testcv in cv:
-    LogisticRegression_classifier = SklearnClassifier(LogisticRegression())
-    classifier = LogisticRegression_classifier.train(training_set[traincv[0]:traincv[len(traincv)-1]])
-    accur.insert(i,nltk.classify.util.accuracy(classifier, training_set[testcv[0]:testcv[len(testcv)-1]]))
-    print('accuracy:',accur[i])
-    i = i+1
-
-print('LogisticRegression_classifier average accuracy:',sum(accur) / len(accur) )
-
-cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
-accur = []
-i = 0
-for traincv, testcv in cv:
-    MNB_classifier = SklearnClassifier(MultinomialNB())
-    classifier = MNB_classifier.train(training_set[traincv[0]:traincv[len(traincv)-1]])
-    accur.insert(i,nltk.classify.util.accuracy(classifier, training_set[testcv[0]:testcv[len(testcv)-1]]))
-    print('accuracy:',accur[i])
-    i = i+1
-
-print('MNB_classifier average accuracy:',sum(accur) / len(accur) )
-
-
-cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
-accur = []
-i = 0
-for traincv, testcv in cv:
-    LinearSVC_classifier = SklearnClassifier(LinearSVC())
-    classifier = LinearSVC_classifier.train(training_set[traincv[0]:traincv[len(traincv)-1]])
-    accur.insert(i,nltk.classify.util.accuracy(classifier, training_set[testcv[0]:testcv[len(testcv)-1]]))
-    print('accuracy:',accur[i])
-    i = i+1
+    print('Precision neg:', precision(refsets['0'], testsets['0']))
+    print('Recall neg:', recall(refsets['0'], testsets['0']))
 
 print('LinearSVC_classifier average accuracy:',sum(accur) / len(accur) )
 
