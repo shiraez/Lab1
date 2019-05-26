@@ -63,6 +63,10 @@ print("testing")
 k=10
 cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
 accur = []
+pos_precision = []
+pos_recall = []
+neg_precision = []
+neg_recall = []
 i = 0
 for traincv, testcv in cv:
     testing_this_round = training_set[testcv[0]:testcv[len(testcv) - 1]]
@@ -79,10 +83,20 @@ for traincv, testcv in cv:
         observed = classifier.classify(feats)
         testsets[observed].add(j)
 
+    cv_accuracy = nltk.classify.util.accuracy(classifier, testing_this_round)
+    cv_pos_precision = precision(refsets['1'], testsets['1'])
+    cv_pos_recall = recall(refsets['1'], testsets['1'])
+    cv_neg_precision = precision(refsets['0'], testsets['0'])
+    cv_neg_recall = recall(refsets['0'], testsets['0'])
+
     print('Precision:', precision(refsets['1'], testsets['1']))
     print('Recall:', recall(refsets['1'], testsets['1']))
     print('Precision neg:', precision(refsets['0'], testsets['0']))
     print('Recall neg:', recall(refsets['0'], testsets['0']))
+    pos_precision.append(cv_pos_precision)
+    pos_recall.append(cv_pos_recall)
+    neg_precision.append(cv_neg_precision)
+    neg_recall.append(cv_neg_recall)
 
 print('LinearSVC_classifier average accuracy:',sum(accur) / len(accur) )
 
