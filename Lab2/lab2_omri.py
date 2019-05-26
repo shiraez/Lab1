@@ -1,38 +1,30 @@
-import csv
-import pickle
 import re
+import csv
 from random import shuffle
-
 import nltk
 import numpy as np
 from flask import Flask, request
 from nltk import SklearnClassifier
-from nltk import collections
-from nltk.metrics.scores import (precision, recall)
 from nltk.tokenize import word_tokenize
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
-
-app = Flask(__name__)
-
-word_features = []
-filename = 'finalized_model.sav'
-classifier = None
-from statistics import mode
-import re
-from sklearn.cross_validation import KFold, cross_val_score
-from sklearn.linear_model import LogisticRegression
-from nltk.classify import ClassifierI
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.svm import SVC, LinearSVC
 from nltk.metrics.scores import (precision, recall)
 from nltk import collections
 import pickle
 
+# from sklearn.cross_validation import KFold ?????
+
+app = Flask(__name__)
+
+pickle_model = "LinearSVC_classifier.pickle"
+pickle_word_features = "word_features.pickle"
+classifier = None
+word_features = []
 
 
 def calc_model():
+    global word_features, classifier
     documents = []
     pos = 0
     neg = 0
@@ -114,13 +106,12 @@ def calc_model():
         neg_precision.append(cv_neg_precision)
         neg_recall.append(cv_neg_recall)
 
-    print('LinearSVC_classifier average accuracy:',sum(accur) / len(accur) )
-    print('precision', (sum(pos_precision)/len(accur) + sum(neg_precision)/len(accur)) / 2)
-    print('recall', (sum(pos_recall)/len(accur) + sum(neg_recall)/len(accur)) / 2)
+    print('LinearSVC_classifier average accuracy:', sum(accur) / len(accur))
+    print('precision', (sum(pos_precision) / len(accur) + sum(neg_precision) / len(accur)) / 2)
+    print('recall', (sum(pos_recall) / len(accur) + sum(neg_recall) / len(accur)) / 2)
 
-    classifier_f = open("LinearSVC_classifier.pickle", "wb")
-    classifier2 = pickle.dump(classifier, classifier_f)
-    classifier_f.close()
+    save_pickle(pickle_model)
+
 
 def sentiment(text):
     feats = find_features(word_tokenize(text))
@@ -131,6 +122,7 @@ def sentiment(text):
 
 
 def find_features(tweet):
+    global word_features
     words = set(tweet)
     features = {}
     for w in word_features:
@@ -138,21 +130,26 @@ def find_features(tweet):
     return features
 
 
-def save_model():
-    pickle.dump(classifier, open(filename, 'wb'))
+def save_pickle(filename):
+    file = open(filename, "wb")
+    pickle.dump(classifier, file)
+    file.close()
 
 
-def load_model():
+def load_pickle(filename):
     return pickle.load(open(filename, 'rb'))
 
 
 @app.route('/', methods=['GET', 'POST'])
 def handle_request():
+    global word_features, classifier
+
     path_to_file = request.args.get('path')
     if path_to_file is None:
         return "path to file is invalid"
 
-    classifier = load_model()
+    classifier = load_pickle(pickle_model)
+    word_features = load_pickle(pickle_word_features)
 
     new_file_name = "predictions.txt"
     with open(path_to_file, 'r', encoding='utf-8') as file:
@@ -166,4 +163,5 @@ def handle_request():
 
 
 if __name__ == '__main__':
+    calc_model()
     app.run(debug=True)
