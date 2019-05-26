@@ -1,5 +1,6 @@
 import csv
 import numpy as np
+from nltk import SklearnClassifier
 from sklearn.model_selection import train_test_split
 import nltk
 from nltk.tokenize import word_tokenize
@@ -7,6 +8,14 @@ from random import shuffle
 from sklearn.model_selection import KFold
 from statistics import mode
 import re
+from sklearn.cross_validation import KFold, cross_val_score
+from sklearn.linear_model import LogisticRegression
+from nltk.classify import ClassifierI
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC, LinearSVC
+from nltk.metrics.scores import (precision, recall)
+from nltk import collections
+
 
 documents = []
 with open("data.csv") as csv_file:
@@ -48,17 +57,82 @@ training_set = feature_sets[:5000]
 
 print("training")
 X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1, random_state=0)
-classifier = nltk.NaiveBayesClassifier.train(training_set)
+# classifier = nltk.NaiveBayesClassifier.train(training_set)
 
 print("testing")
-print("Classifier accuracy percent:", (nltk.classify.accuracy(classifier, testing_set)) * 100)
+# print("Classifier accuracy percent:", (nltk.classify.accuracy(classifier, testing_set)) * 100)
+k=10
+cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
+accur = []
+i = 0
+
+for traincv, testcv in cv:
+    testing_this_round = training_set[testcv[0]:testcv[len(testcv)-1]]
+    classifier = nltk.NaiveBayesClassifier.train(training_set[traincv[0]:traincv[len(traincv)-1]])
+    accur.insert(i,nltk.classify.util.accuracy(classifier, training_set[testcv[0]:testcv[len(testcv)-1]]))
+    print('accuracy:',accur[i])
+    i = i+1
+    refsets = collections.defaultdict(set)
+    testsets = collections.defaultdict(set)
+
+    for j, (feats, label) in enumerate(testing_this_round):
+        refsets[label].add(j)
+        observed = classifier.classify(feats)
+        testsets[observed].add(j)
+
+    print('Precision:', precision(refsets['1'], testsets['1']))
+    print('Recall:', recall(refsets['1'], testsets['1']))
+
+
+print('NaiveBayesClassifier average accuracy:',sum(accur) / len(accur) )
+
+
+
+
+cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
+accur = []
+i = 0
+for traincv, testcv in cv:
+    LogisticRegression_classifier = SklearnClassifier(LogisticRegression())
+    classifier = LogisticRegression_classifier.train(training_set[traincv[0]:traincv[len(traincv)-1]])
+    accur.insert(i,nltk.classify.util.accuracy(classifier, training_set[testcv[0]:testcv[len(testcv)-1]]))
+    print('accuracy:',accur[i])
+    i = i+1
+
+print('LogisticRegression_classifier average accuracy:',sum(accur) / len(accur) )
+
+cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
+accur = []
+i = 0
+for traincv, testcv in cv:
+    MNB_classifier = SklearnClassifier(MultinomialNB())
+    classifier = MNB_classifier.train(training_set[traincv[0]:traincv[len(traincv)-1]])
+    accur.insert(i,nltk.classify.util.accuracy(classifier, training_set[testcv[0]:testcv[len(testcv)-1]]))
+    print('accuracy:',accur[i])
+    i = i+1
+
+print('MNB_classifier average accuracy:',sum(accur) / len(accur) )
+
+
+cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
+accur = []
+i = 0
+for traincv, testcv in cv:
+    LinearSVC_classifier = SklearnClassifier(LinearSVC())
+    classifier = LinearSVC_classifier.train(training_set[traincv[0]:traincv[len(traincv)-1]])
+    accur.insert(i,nltk.classify.util.accuracy(classifier, training_set[testcv[0]:testcv[len(testcv)-1]]))
+    print('accuracy:',accur[i])
+    i = i+1
+
+print('LinearSVC_classifier average accuracy:',sum(accur) / len(accur) )
+
 
 def sentiment(text):
-    feats = find_features(text)
-    v = classifier.classify(feats)
-    votes = []
-    votes.append(v)
-    return mode(votes)
+    feats = find_features(word_tokenize(text))
+    return classifier.classify(feats)
+    # votes = []
+    # votes.append(v)
+    # return mode(votes)
 
 
 print(sentiment("This movie was awesome! The acting was great, plot was wonderful, and there were pythons...so yea!"))

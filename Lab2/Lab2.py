@@ -14,6 +14,7 @@ import csv
 # documents = [(list(movie_reviews.words(fileid)), category)
 #              for category in movie_reviews.categories()
 #              for fileid in movie_reviews.fileids(category)]
+from sphinx.util import requests
 
 documents = []
 set_word = {}
