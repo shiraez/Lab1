@@ -60,7 +60,7 @@ X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1,
 
 print("testing")
 
-
+k=10
 cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
 accur = []
 i = 0
