@@ -5,13 +5,15 @@ import nltk
 from nltk.tokenize import word_tokenize
 from random import shuffle
 from sklearn.model_selection import KFold
+from statistics import mode
+import re
 
 documents = []
 with open("data.csv") as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for record in csv_reader:
-        # ap = (' '.join(re.sub("(@[A-Za-z0-9]+)|(\w+:\/\/\S+)", " ", record[1]).split())).split()
-        ap = word_tokenize(record[1])
+        ap = (' '.join(re.sub("(@[A-Za-z0-9]+)|(\w+:\/\/\S+)", " ", record[1]).split()))
+        ap = word_tokenize(ap)
         documents.append((ap, record[0]))
 
 shuffle(documents)
@@ -23,7 +25,8 @@ for tweet in documents:
 
 all_words = nltk.FreqDist(all_words)
 print("getting features")
-word_features = list(all_words.keys())[:3000]
+word_features = list(all_words.keys())[:1000]
+print(word_features)
 
 
 def find_features(tweet):
@@ -49,3 +52,14 @@ classifier = nltk.NaiveBayesClassifier.train(training_set)
 
 print("testing")
 print("Classifier accuracy percent:", (nltk.classify.accuracy(classifier, testing_set)) * 100)
+
+def sentiment(text):
+    feats = find_features(text)
+    v = classifier.classify(feats)
+    votes = []
+    votes.append(v)
+    return mode(votes)
+
+
+print(sentiment("This movie was awesome! The acting was great, plot was wonderful, and there were pythons...so yea!"))
+print(sentiment("sorry. Horrible movie, 0/10"))
