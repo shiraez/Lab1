@@ -135,22 +135,30 @@ def handle_request():
 
     path_to_file = request.args.get('path')
     if path_to_file is None:
-        return "path to file is invalid"
+        return "<h2>path to file is invalid</h2>" \
+               "<h3>please use: <a href='http://localhost:5000/'>http://localhost:5000/?path=C:\\example\\file.txt</a></h3>"
 
     classifier = load_pickle(pickle_model)
     word_features = load_pickle(pickle_word_features)
 
     new_file_name = "predictions.txt"
+    output_text = "Results saved to file: 'predictions.txt' in the working directory<br><br>[0 - negative | 1 - positive]<br><h3><u><b>Results</b></u></h3>"
     with open(path_to_file, 'r', encoding='utf-8') as file:
         with open(new_file_name, 'w', encoding='utf-8') as new_file:
             for line in file:
                 prediction = sentiment(line)
                 new_file.write(prediction)
                 new_file.write("\n")
+                color = ""
+                if prediction == '1':
+                    color = "green"
+                else:
+                    color = "red"
+                output_text += "<div style=\'color:" + color + "'>" + prediction + " | " + line + "</div><br>"
 
-    return "done!"
+    return output_text
 
 
 if __name__ == '__main__':
-    #calc_model()
+    # calc_model()
     app.run(debug=True)
