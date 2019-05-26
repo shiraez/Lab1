@@ -112,7 +112,7 @@ print('precision', (sum(pos_precision)/len(accur) + sum(neg_precision)/len(accur
 print('recall', (sum(pos_recall)/len(accur) + sum(neg_recall)/len(accur)) / 2)
 
 classifier_f = open("LinearSVC_classifier.pickle", "wb")
-classifier = pickle.dump(classifier, classifier_f)
+classifier2 = pickle.dump(classifier, classifier_f)
 classifier_f.close()
 def sentiment(text):
     feats = find_features(word_tokenize(text))
