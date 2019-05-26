@@ -15,15 +15,24 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import SVC, LinearSVC
 from nltk.metrics.scores import (precision, recall)
 from nltk import collections
-
+import pickle
 
 documents = []
+pos = 0
+neg = 0
 with open("data.csv") as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for record in csv_reader:
         ap = (' '.join(re.sub("(@[A-Za-z0-9]+)|(\w+:\/\/\S+)", " ", record[1]).split()))
         ap = word_tokenize(ap)
         documents.append((ap, record[0]))
+        if '0'== record[0]:
+            neg = neg + 1
+        elif '1'== record[0]:
+            pos = pos + 1
+
+print("neg ", neg)
+print("pos ", pos)
 
 shuffle(documents)
 
@@ -99,8 +108,12 @@ for traincv, testcv in cv:
     neg_recall.append(cv_neg_recall)
 
 print('LinearSVC_classifier average accuracy:',sum(accur) / len(accur) )
+print('precision', (sum(pos_precision)/len(accur) + sum(neg_precision)/len(accur)) / 2)
+print('recall', (sum(pos_recall)/len(accur) + sum(neg_recall)/len(accur)) / 2)
 
-
+classifier_f = open("LinearSVC_classifier.pickle", "wb")
+classifier = pickle.dump(classifier, classifier_f)
+classifier_f.close()
 def sentiment(text):
     feats = find_features(word_tokenize(text))
     return classifier.classify(feats)
