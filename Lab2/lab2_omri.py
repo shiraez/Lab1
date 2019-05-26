@@ -19,16 +19,36 @@ app = Flask(__name__)
 word_features = []
 filename = 'finalized_model.sav'
 classifier = None
+from statistics import mode
+import re
+from sklearn.cross_validation import KFold, cross_val_score
+from sklearn.linear_model import LogisticRegression
+from nltk.classify import ClassifierI
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC, LinearSVC
+from nltk.metrics.scores import (precision, recall)
+from nltk import collections
+import pickle
+
 
 
 def calc_model():
     documents = []
+    pos = 0
+    neg = 0
     with open("data.csv") as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for record in csv_reader:
             ap = (' '.join(re.sub("(@[A-Za-z0-9]+)|(\w+:\/\/\S+)", " ", record[1]).split()))
             ap = word_tokenize(ap)
             documents.append((ap, record[0]))
+            if '0' == record[0]:
+                neg = neg + 1
+            elif '1' == record[0]:
+                pos = pos + 1
+
+    print("neg ", neg)
+    print("pos ", pos)
 
     shuffle(documents)
 
@@ -94,11 +114,13 @@ def calc_model():
         neg_precision.append(cv_neg_precision)
         neg_recall.append(cv_neg_recall)
 
-    print('LinearSVC_classifier average accuracy:', sum(accur) / len(accur))
-    print(
-        sentiment("This movie was awesome! The acting was great, plot was wonderful, and there were pythons...so yea!"))
-    print(sentiment("sorry. Horrible movie, 0/10"))
+    print('LinearSVC_classifier average accuracy:',sum(accur) / len(accur) )
+    print('precision', (sum(pos_precision)/len(accur) + sum(neg_precision)/len(accur)) / 2)
+    print('recall', (sum(pos_recall)/len(accur) + sum(neg_recall)/len(accur)) / 2)
 
+    classifier_f = open("LinearSVC_classifier.pickle", "wb")
+    classifier2 = pickle.dump(classifier, classifier_f)
+    classifier_f.close()
 
 def sentiment(text):
     feats = find_features(word_tokenize(text))
