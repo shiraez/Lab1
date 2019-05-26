@@ -7,14 +7,12 @@ from flask import Flask, request
 from nltk import SklearnClassifier
 from nltk.tokenize import word_tokenize
 from sklearn.model_selection import KFold
-from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
 from nltk.metrics.scores import (precision, recall)
 from nltk import collections
 import pickle
 
-# from sklearn.cross_validation import KFold ?????
-
+nltk.download('punkt')
 app = Flask(__name__)
 
 pickle_model = "LinearSVC_classifier.pickle"
@@ -52,34 +50,29 @@ def calc_model():
     all_words = nltk.FreqDist(all_words)
     print("getting features")
     word_features = list(all_words.keys())[:1000]
-    print(word_features)
+
+    save_pickle(pickle_word_features, word_features)
+    print("saved word features")
 
     print("setting features per tweet")
     feature_sets = np.array([[find_features(tweet), category] for (tweet, category) in documents])
 
     data = feature_sets[:, 0]
-    target = feature_sets[:, 1]
-
-    testing_set = feature_sets[5000:]
-    training_set = feature_sets[:5000]
-
-    print("training")
-    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1, random_state=0)
-
-    print("testing")
 
     k = 10
-    cv = KFold(len(training_set), n_folds=k, shuffle=False, random_state=None)
+    cv = KFold(k)
     accur = []
     pos_precision = []
     pos_recall = []
     neg_precision = []
     neg_recall = []
     i = 0
-    for traincv, testcv in cv:
-        testing_this_round = training_set[testcv[0]:testcv[len(testcv) - 1]]
-        LinearSVC_classifier = SklearnClassifier(LinearSVC())
-        classifier = LinearSVC_classifier.train(training_set[traincv[0]:traincv[len(traincv) - 1]])
+    for train_index, test_index in cv.split(data):
+        print("starting split " + str(i + 1))
+        training_this_round = feature_sets[train_index]
+        testing_this_round = feature_sets[test_index]
+        linear_svc_classifier = SklearnClassifier(LinearSVC())
+        classifier = linear_svc_classifier.train(training_this_round)
         accur.insert(i, nltk.classify.util.accuracy(classifier, testing_this_round))
         print('accuracy:', accur[i])
         i = i + 1
@@ -91,7 +84,6 @@ def calc_model():
             observed = classifier.classify(feats)
             testsets[observed].add(j)
 
-        cv_accuracy = nltk.classify.util.accuracy(classifier, testing_this_round)
         cv_pos_precision = precision(refsets['1'], testsets['1'])
         cv_pos_recall = recall(refsets['1'], testsets['1'])
         cv_neg_precision = precision(refsets['0'], testsets['0'])
@@ -110,15 +102,12 @@ def calc_model():
     print('precision', (sum(pos_precision) / len(accur) + sum(neg_precision) / len(accur)) / 2)
     print('recall', (sum(pos_recall) / len(accur) + sum(neg_recall) / len(accur)) / 2)
 
-    save_pickle(pickle_model)
+    save_pickle(pickle_model, classifier)
 
 
 def sentiment(text):
     feats = find_features(word_tokenize(text))
     return classifier.classify(feats)
-    # votes = []
-    # votes.append(v)
-    # return mode(votes)
 
 
 def find_features(tweet):
@@ -130,9 +119,9 @@ def find_features(tweet):
     return features
 
 
-def save_pickle(filename):
+def save_pickle(filename, what_to_save):
     file = open(filename, "wb")
-    pickle.dump(classifier, file)
+    pickle.dump(what_to_save, file)
     file.close()
 
 
@@ -163,5 +152,5 @@ def handle_request():
 
 
 if __name__ == '__main__':
-    calc_model()
+    #calc_model()
     app.run(debug=True)
