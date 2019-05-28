@@ -1,6 +1,7 @@
 from Tkinter import *
 from backend import *
-from tkinter import messagebox
+# from tkinter import messagebox
+import tkMessageBox
 
 def logModification(var,*args):
     print('variable '+var+' has been modified')
@@ -48,7 +49,7 @@ def updateSelected():
      try:
          update(id, title, genres)
      except Exception:
-         messagebox.showinfo("Error", "The ID isn't valid")
+         tkMessageBox.showinfo("Error", "The ID isn't valid")
          return
      listBox.delete(index)
      listBox.insert(index, "{}, {}, {}".format(id, title, genres))
@@ -58,16 +59,16 @@ def updateSelected():
 def add_entry():
     listBox.delete(0, END)
     if title_ID.get() == "" or entry_title.get() == "" or entry_year.get() == "":
-        messagebox.showinfo("Error", "You need to add all field")
+        tkMessageBox.showinfo("Error", "You need to add all field")
 
     else:
         if len(search(title_ID.get(), "", "")) >0:
-            messagebox.showinfo("Error", "ID already exist")
+            tkMessageBox.showinfo("Error", "ID already exist")
             return
         try:
             insert_to_db(title_ID.get(), entry_title.get(),entry_year.get())
         except Exception:
-            messagebox.showinfo("Error", "the record isn't valid")
+            tkMessageBox.showinfo("Error", "the record isn't valid")
             return
         listBox.insert(END, "{}, {}, {}".format(title_ID.get(), entry_title.get(), entry_year.get()))
 
